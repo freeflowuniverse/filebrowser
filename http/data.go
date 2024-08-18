@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/tomasen/realip"
 
 	"github.com/filebrowser/filebrowser/v2/rules"
@@ -60,7 +61,14 @@ func handle(fn handleFunc, prefix string, store *storage.Storage, server *settin
 		}
 
 		status, err := fn(w, r, &data{
-			Runner:   &runner.Runner{Enabled: server.EnableExec, Settings: settings},
+			Runner: &runner.Runner{
+				Enabled:  server.EnableExec,
+				Settings: settings,
+				RedisClient: redis.NewClient(&redis.Options{
+					Addr: "localhost:6379",
+					DB:   0,
+				}),
+			},
 			store:    store,
 			settings: settings,
 			server:   server,
